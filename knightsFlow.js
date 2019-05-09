@@ -214,6 +214,27 @@ for (let i = 0; i < stack.length; i++) {
   // console.log(stack[i]);
 }
 
+// ********************************ALGORITHM 3************************************************
+// function findBestPath (point, destination) {
+//   let currentPoint = isMovingAway(point)
+//   let setPoints = findNextPossibleMoves(currentPoint, grid, maxPossibleFlow = 1000)
+//   var visited = []
+//   for (var i = 0; i < this.noOfVertices; i++) { visited[i] = false }
+
+//   this.DFSUtil(setPoints, visited)
+// }
+// function DFSUtil (vert, visited) {
+//   visited[vert] = true
+//   console.log(vert)
+
+//   var getNeighbours = this.AdjList.get(vert)
+
+//   for (var i in getNeighbours) {
+//     var getElem = getNeighbours[i]
+//     if (!visited[getElem]) { this.DFSUtil(getElem, visited) }
+//   }
+// }
+
 // // ***********************DFS #1***********************************************
 // function DFS (node) {
 //   // Create a Stack and add our initial node in it
