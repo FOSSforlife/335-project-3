@@ -200,10 +200,23 @@ function findQuickPath(point, destination) {
   }
 };
 
+function manhattanDistance(point1, point2) {
+  return (Math.abs(point2[0] - point1[0]) + Math.abs(point2[1] - point1[1]));
+}
+
 // TODO: ALGORITHM PART 3
 // use the existing findNextPossibleMoves() and isMovingAway() functions
 // the only hard part is figuring out DFS traversal
-function findBestPath(point, destination) {
+function findBestPath(point, destination, lastDistances) {
+  // check if knight is moving away
+  lastDistances.push(manhattanDistance(point, destination));
+  if(lastDistances.length > 3) {
+    lastDistances.shift();
+  }
+  if(isMovingAway(lastDistances)) {
+    return;
+  }
+
 
 }
 
