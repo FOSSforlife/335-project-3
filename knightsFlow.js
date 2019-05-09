@@ -3,7 +3,7 @@ let sink = [8, 7];
 let gridBoundaries = [1, 10];
 
 let stack = [];
-let maxPossibleFlow, lastDistances, referenceFlow;
+let maxPossibleFlow, lastDistances = [], referenceFlow, visitedPoints = [], destinationReached;
 
 // create 2d grid where each cell contains its capacity (a random even number)
 function createGrid() {
@@ -18,6 +18,7 @@ function createGrid() {
   return gridRows;
 }
 
+// use this one for {x: int, y: int} objects
 function containsPoint (current, stack) {
   for (let i = 0; i < stack.length; i++) {
     if (current === stack[i]) {
@@ -25,6 +26,11 @@ function containsPoint (current, stack) {
     }
   }
   return false;
+}
+
+// use this one for [x, y] arrays
+function containsPointNonFormatted(arrayOfPoints, point) {
+  return arrayOfPoints.findIndex(p => { return (p[0] == point[0] && p[1] == point[1]); }) > -1;
 }
 
 function formatPoint(point) {
@@ -36,8 +42,8 @@ function formatPoint(point) {
 
 function coordInBounds(coord) {
   return (
-    coord >= gridBoundaries[0] &&
-    coord <= gridBoundaries[1]
+    coord >= gridBoundaries[0] - 1 &&
+    coord <= gridBoundaries[1] - 1 
   );
 }
 
@@ -111,10 +117,10 @@ function findMoveCloserToSink(knightCoords, sinkCoords) {
   
 }
 
-function findNextPossibleMoves(knightCoords, grid, maxPossibleFlow = 1000) {
+function findNextPossibleMoves(start, grid, maxPossibleFlow = 1000) {
   let possibleMoves = [];
-  for(let xSign = -1; xSign <= 1; xSign *= -1) {
-    for(let ySign = -1; ySign <= 1; ySign *= -1) {
+  for(let xSign = -1; xSign <= 1; xSign = xSign + 2) {
+    for(let ySign = -1; ySign <= 1; ySign = ySign + 2) {
       for(let horizontal = 0; horizontal <= 1; horizontal++) {
         let newMove, edgeCapacity;
         if(horizontal) {
@@ -124,8 +130,13 @@ function findNextPossibleMoves(knightCoords, grid, maxPossibleFlow = 1000) {
           newMove = [start[0] + (1*xSign), start[1] + (2*ySign)];
         }
 
-        edgeCapacity = (grid[newMove[0], newMove[1]] + grid[knightCoords[0], knightCoords[1]]) / 2;
-        if(inBounds(newMove) || edgeCapacity >= referenceFlow) {
+        if(!inBounds(newMove)) { // out of grid bounds
+          break;
+        }
+        // console.log(`newMove = ${newMove}`);
+        edgeCapacity = (grid[newMove[0]][newMove[1]] + grid[start[0]][start[1]]) / 2;
+        if(!referenceFlow || edgeCapacity >= referenceFlow) {
+          // console.log(`${edgeCapacity} >= ${referenceFlow}`);
           possibleMoves.push({
             coords: newMove,
             edgeCapacity: Math.min(edgeCapacity, maxPossibleFlow)
@@ -134,25 +145,31 @@ function findNextPossibleMoves(knightCoords, grid, maxPossibleFlow = 1000) {
       }
     }  
   }
+  // console.log(possibleMoves);
   return possibleMoves
-    .sort((a, b) => a.edgeCapacity > b.edgeCapacity)
+    .sort((a, b) => a.edgeCapacity < b.edgeCapacity)
     .map(a => a.coords);
 }
 
 // this assumes distances are sorted from least recent to most recent
 // e.g. [3, 5, 7] would be moving away (and would return true)
 function isMovingAway(lastDistances) {
-  return (lastDistances[2] > lastDistances[1] 
+  return (lastDistances.length == 3
+      && lastDistances[2] > lastDistances[1] 
       &&  lastDistances[1] > lastDistances[0]);
 }
 
 function flow(stack, grid) {
   return stack.reduce((acc, point, idx) => {
+    let edgeCapacity = (grid[point['x']][point['y']] + grid[stack[idx-1]['x']][stack[idx-1]['y']]) / 2;
+    /* console.log(`(${stack[idx-1]['x']}, ${stack[idx-1]['y']}) = ${grid[stack[idx-1]['x']][stack[idx-1]['y']]}`);
+    console.log(`(${point['x']}, ${point['y']}) = ${grid[point['x']][point['y']]}`);
+    console.log(`edgeCapacity = ${edgeCapacity}`); */
+
     if(idx == 1) {
-      return 1000;
+      return edgeCapacity;
     }
     else {
-      let edgeCapacity = (grid[point['x']][point['y']] + grid[stack[idx-1]['x']][stack[idx-1]['y']]) / 2;
       return Math.min(acc, edgeCapacity);
     }
   });
@@ -161,14 +178,14 @@ function flow(stack, grid) {
 // TODO: copy/paste grid code from project 1; draw source, sink, and knight path on it
 
 // ALGORITHM PART 1
-function findMaxPossibleFlow(grid) {
+function findMaxPossibleFlow(source, sink, grid) {
   let sourceEdges = findNextPossibleMoves(source, grid);
   let sourceMaxEdge = sourceEdges[0];
-  let sourceMaxEdgeCapacity = (grid[source[0], source[1]] + grid[sourceMaxEdge[0], sourceMaxEdge[1]]) / 2;
+  let sourceMaxEdgeCapacity = (grid[source[0]][source[1]] + grid[sourceMaxEdge[0]][sourceMaxEdge[1]]) / 2;
 
   let sinkEdges = findNextPossibleMoves(sink, grid);
   let sinkMaxEdge = sinkEdges[0];
-  let sinkMaxEdgeCapacity = (grid[sink[0], sink[1]] + grid[sinkMaxEdge[0], sinkMaxEdge[1]]) / 2;
+  let sinkMaxEdgeCapacity = (grid[sink[0]][sink[1]] + grid[sinkMaxEdge[0]][sinkMaxEdge[1]]) / 2;
 
   return Math.max(sourceMaxEdgeCapacity, sinkMaxEdgeCapacity);
 }
@@ -204,28 +221,60 @@ function manhattanDistance(point1, point2) {
   return (Math.abs(point2[0] - point1[0]) + Math.abs(point2[1] - point1[1]));
 }
 
+
+
 // TODO: ALGORITHM PART 3
 // use the existing findNextPossibleMoves() and isMovingAway() functions
 // the only hard part is figuring out DFS traversal
-function findBestPath(point, destination, lastDistances) {
+function findBestPath(point, destination, grid, newStack) {
+  newStack.push(formatPoint(point));
+  visitedPoints.push(point);
+  // console.log(`(${point[0]}, ${point[1]}) = ${grid[point[0]][point[1]]}`);
+  if(point[0] == destination[0] && point[1] == destination[1]) {
+    destinationReached = true;
+    return newStack;
+  }
+
   // check if knight is moving away
   lastDistances.push(manhattanDistance(point, destination));
   if(lastDistances.length > 3) {
     lastDistances.shift();
   }
   if(isMovingAway(lastDistances)) {
-    return;
+    newStack.pop();
   }
-
-
+  else { // DFS
+    let nextMoves = findNextPossibleMoves(point, grid, maxPossibleFlow)
+      .filter(p => {
+        return !containsPointNonFormatted(visitedPoints, p); // only include non-visited points
+      });
+    
+    for(let i = 0; i < nextMoves.length && !destinationReached; i++) {
+      if(!containsPointNonFormatted(visitedPoints, nextMoves[i])) {
+        newStack = findBestPath(nextMoves[i], destination, grid, newStack);
+      }
+    }
+    if(!destinationReached) {
+      console.log("Path not found");
+      newStack.pop();
+    }
+  }
+  return newStack;
 }
 
 grid = createGrid();
+maxPossibleFlow = findMaxPossibleFlow(source, sink, grid);
+console.log(`MAX POSSIBLE FLOW: ${maxPossibleFlow}`);
+
+console.log("FIRST PATH:");
 findQuickPath(source, sink);
-console.log(flow(stack, grid));
-for (let i = 0; i < stack.length; i++) {
-  // console.log(stack[i]);
-}
+referenceFlow = flow(stack, grid);
+let bestPath = findBestPath(source, sink, grid, []);
+console.log("\nBEST PATH:");
+console.log(bestPath);
+console.log(`Flow of first path = ${flow(stack, grid)}`);
+console.log(`Flow of second path = ${flow(bestPath, grid)}`);
+
 
 // ********************************ALGORITHM 3************************************************
 // function findBestPath (point, destination) {
