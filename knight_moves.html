@@ -4,21 +4,49 @@
     <meta charset="UTF-8">
     <title>Working on my Knight Moves </title>
     <style type= "text/css">
-        canvas {border: 1px solid black;
+        div {
+            float:left;
+        }
+        canvas {
+            border: 1px solid black;
+            margin-right:100px;
         }
         body {
         	margin:0;
         }
+        td {
+            padding-left: 20px;
+        }
     </style>
     
- 
-
+    
+    
+    
+    
 </head>
 <body>
     
+    <div> <canvas> </canvas></div>
+    <table id="resultsText">
+        <tr>
+            <td>Maximum flow possible (according to source and sink edges)</td>
+            <td id="maxFlow"></td>
+            <td id="maxFlowTime"></td>
+        </tr>
+        <tr>
+            <td>Flow of first path found (fastest path)</td>
+            <td id="firstFlow"></td>
+            <td id="firstFlowTime"></td>
+        </tr>
+        <tr>
+            <td>Flow of "best" path</td>
+            <td id="bestFlow"></td>
+            <td id="bestFlowTime"></td>
+        </tr>
 
-<canvas> </canvas>
-<script src= "canvas.js"></script>
-
+    </table>
+    <span id="resultsText"></span>
+    <script type="text/javascript" src= "knightsFlow.js"></script>
+    <script src= "canvas.js"></script>
 </body>
 </html>

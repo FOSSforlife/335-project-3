@@ -1,3 +1,4 @@
+//var canvas= document.querySelector('knightsFLow');
 let source = [1, 2];
 let sink = [8, 7];
 let gridBoundaries = [1, 10];
@@ -125,9 +126,11 @@ function findNextPossibleMoves(start, grid, maxPossibleFlow = 1000) {
         let newMove, edgeCapacity;
         if(horizontal) {
           newMove = [start[0] + (2*xSign), start[1] + (1*ySign)];
+          //draw_knight_path(newMove);
         }
         else {
           newMove = [start[0] + (1*xSign), start[1] + (2*ySign)];
+          //draw_knight_path(newMove);
         }
 
         if(!inBounds(newMove)) { // out of grid bounds
@@ -162,9 +165,9 @@ function isMovingAway(lastDistances) {
 function flow(stack, grid) {
   return stack.reduce((acc, point, idx) => {
     let edgeCapacity = (grid[point['x']][point['y']] + grid[stack[idx-1]['x']][stack[idx-1]['y']]) / 2;
-    /* console.log(`(${stack[idx-1]['x']}, ${stack[idx-1]['y']}) = ${grid[stack[idx-1]['x']][stack[idx-1]['y']]}`);
+     console.log(`(${stack[idx-1]['x']}, ${stack[idx-1]['y']}) = ${grid[stack[idx-1]['x']][stack[idx-1]['y']]}`);
     console.log(`(${point['x']}, ${point['y']}) = ${grid[point['x']][point['y']]}`);
-    console.log(`edgeCapacity = ${edgeCapacity}`); */
+    console.log(`edgeCapacity = ${edgeCapacity}`); 
 
     if(idx == 1) {
       return edgeCapacity;
@@ -223,9 +226,7 @@ function manhattanDistance(point1, point2) {
 
 
 
-// TODO: ALGORITHM PART 3
-// use the existing findNextPossibleMoves() and isMovingAway() functions
-// the only hard part is figuring out DFS traversal
+// ALGORITHM PART 3
 function findBestPath(point, destination, grid, newStack) {
   newStack.push(formatPoint(point));
   visitedPoints.push(point);
@@ -259,105 +260,42 @@ function findBestPath(point, destination, grid, newStack) {
       newStack.pop();
     }
   }
+  //draw_knight_path(newStack);
   return newStack;
 }
 
+let resultsText = '';
 grid = createGrid();
 maxPossibleFlow = findMaxPossibleFlow(source, sink, grid);
 console.log(`MAX POSSIBLE FLOW: ${maxPossibleFlow}`);
 
 console.log("FIRST PATH:");
+let firstPathTime = window.performance.now();
 findQuickPath(source, sink);
+firstPathTime = window.performance.now() - firstPathTime;
+
 referenceFlow = flow(stack, grid);
+
+let bestPathTime = window.performance.now();
 let bestPath = findBestPath(source, sink, grid, []);
+bestPathTime = window.performance.now() - bestPathTime;
+
 console.log("\nBEST PATH:");
-console.log(bestPath);
-console.log(`Flow of first path = ${flow(stack, grid)}`);
-console.log(`Flow of second path = ${flow(bestPath, grid)}`);
-
-
-// ********************************ALGORITHM 3************************************************
-// function findBestPath (point, destination) {
-//   let currentPoint = isMovingAway(point)
-//   let setPoints = findNextPossibleMoves(currentPoint, grid, maxPossibleFlow = 1000)
-//   var visited = []
-//   for (var i = 0; i < this.noOfVertices; i++) { visited[i] = false }
-
-//   this.DFSUtil(setPoints, visited)
-// }
-// function DFSUtil (vert, visited) {
-//   visited[vert] = true
-//   console.log(vert)
-
-//   var getNeighbours = this.AdjList.get(vert)
-
-//   for (var i in getNeighbours) {
-//     var getElem = getNeighbours[i]
-//     if (!visited[getElem]) { this.DFSUtil(getElem, visited) }
-//   }
-// }
-
-// // ***********************DFS #1***********************************************
-// function DFS (node) {
-//   // Create a Stack and add our initial node in it
-//   let s = new Stack(this.nodes.length)
-//   let explored = new Set()
-//   s.push(node)
-//   // Mark the first node as explored
-//   explored.add(node)
-//   // We'll continue till our Stack gets empty
-//   while (!s.isEmpty()) {
-//     let t = s.pop()
-//     // Log every element that comes out of the Stack
-//     console.log(t)
-//     // 1. In the edges object, we search for nodes this node is directly connected to.
-//     // 2. We filter out the nodes that have already been explored.
-//     // 3. Then we mark each unexplored node as explored and push it to the Stack.
-//     this.edges[t]
-//       .filter(n => !explored.has(n))
-//       .forEach(n => {
-//         explored.add(n)
-//         s.push(n)
-//       })
-//   }
-// }
-
-// let g = new Graph()
-// g.addNode('A')
-// g.addNode('B')
-// g.addNode('C')
-// g.addNode('D')
-// g.addNode('E')
-// g.addNode('F')
-// g.addNode('G')
-
-// g.addEdge('A', 'C')
-// g.addEdge('A', 'B')
-// g.addEdge('A', 'D')
-// g.addEdge('D', 'E')
-// g.addEdge('E', 'F')
-// g.addEdge('B', 'G')
-
-// g.DFS('A')
-
-// // ********************************DFS #2**********************************************
-// function dfs (startingNode) {
-//   var visited = []
-//   for (var i = 0; i < this.noOfVertices; i++) { visited[i] = false }
-
-//   this.DFSUtil(startingNode, visited)
-// }
-
-// // Recursive function which process and explore
-// // all the adjacent vertex of the vertex with which it is called
-// function DFSUtil (vert, visited) {
-//   visited[vert] = true
-//   console.log(vert)
-
-//   var getNeighbours = this.AdjList.get(vert)
-
-//   for (var i in getNeighbours) {
-//     var getElem = getNeighbours[i]
-//     if (!visited[getElem]) { this.DFSUtil(getElem, visited) }
-//   }
-// }
+//console.log(Object.values(bestPath[0]));
+var nresult = [];
+//function convertArr(){ 
+  for(let j = 0; j < bestPath.length; j++)
+  {
+      nresult[j] = Object.values(bestPath[j]);
+      //console.log(nresult[j]);
+  }
+//      return nresult;
+//}
+//console.log(`Flow of first path = ${flow(stack, grid)}`);
+//alert(flow(bestPath, grid));
+var bestFlow = flow(bestPath, grid);
+document.getElementById('maxFlow').appendChild(document.createTextNode(maxPossibleFlow));
+document.getElementById('firstFlow').appendChild(document.createTextNode(referenceFlow));
+document.getElementById('bestFlow').appendChild(document.createTextNode(bestFlow));
+// document.getElementById('firstFlowTime').appendChild(document.createTextNode('(' + firstPathTime + ' ms)'));
+// document.getElementById('bestFlowTime').appendChild(document.createTextNode('(' + bestPathTime + ' ms)'));

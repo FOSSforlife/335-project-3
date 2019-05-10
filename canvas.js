@@ -1,7 +1,8 @@
+
 var canvas= document.querySelector('canvas');
 //make canvas fill the entire window (though our grid does not necessarily have to)
-canvas.width= window.innerWidth;
-canvas.height= window.innerHeight;
+canvas.width= 600;
+canvas.height= 600;
 
 //get drawing methods for the canvas
 var c= canvas.getContext('2d');
@@ -53,7 +54,7 @@ function draw_circle_at_coordinate(x,y){
 
 
 
-
+/*
 //create 2d array of the flow capacity ***this function is already in the main file***
 function createGrid() {
   let gridRows = new Array(10);
@@ -66,7 +67,7 @@ function createGrid() {
   });
   return gridRows;
 }
-
+*/
 
 
 
@@ -110,10 +111,10 @@ function draw_knight_path(path_array){
 //-------Drawing------	
 
 //*******make sure this is the same values that the algorithm is using and not creating another instance **********
-var flow_values= createGrid();
+//var flow_values= createGrid();
 
 draw_grid();
-draw_flow_capacity(flow_values);
+draw_flow_capacity(grid);
 
 //marks source point at 1,2 (indexed from zero)
 c.strokeStyle= 'blue';
@@ -126,9 +127,21 @@ c.strokeStyle= 'red';
 draw_circle_at_coordinate(8,7);
 
 
+
 //just testing the path.  
-var test_path= [[1,2], [2,4], [3,6], [4,5]];
-draw_knight_path(test_path);
+//var test_path= [[1,2], [2,4], [3,6], [4,5]];
+//let stack = [];
+//grid = createGrid();
+//let source = [1, 2];
+//let sink = [8, 7];
+//var test_path= findBestPath(source, sink, grid, []);
 
-
-
+//checkCall2();
+draw_knight_path(nresult);
+// alert(bestFlow);
+/*
+function checkCall()
+{
+	alert(nresult);
+}
+*/
